@@ -1,1 +1,1 @@
-# SAMROOTIK Autonomous Vehicle Project
+# EVOART-O Autonomous Vehicle Project
