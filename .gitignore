@@ -1,11 +1,36 @@
+# ═══════════════════════════════════════════════════════
+# EVOART-O .gitignore
+# ═══════════════════════════════════════════════════════
+
+# ── ROS 2 / Colcon build artifacts ──
 build/
-
 install/
-
 log/
 
-.vscode/
-
+# ── Python ──
+.venv/
 *.pyc
-
 __pycache__/
+*.egg-info/
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── YOLO model weights (too large for git) ──
+*.pt
+*.onnx
+*.engine
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+
+# ── Competition documents (too large / not source code) ──
+*.pdf
+*.docx
+README_1.md
+

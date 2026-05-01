@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>evoart_brain</name>
+  <version>0.0.1</version>
+  <description>EVOART-O Intelligence and Navigation Stack</description>
+  <maintainer email="leykun@todo.todo">leykun</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>nav2_behavior_tree</depend>
+  <depend>behaviortree_cpp</depend>
+  <depend>evoart_interfaces</depend>
+  <depend>nav2_route</depend>
+  <depend>nav2_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
