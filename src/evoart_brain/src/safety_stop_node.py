@@ -42,8 +42,8 @@ class SafetyStopNode(Node):
             area = width * height
             
             # If the person takes up a significant portion of the camera view, they are close
-            # Assuming a 640x480 camera (307,200 pixels). 15000 is roughly 5% of the screen.
-            if area > 15000:
+            # Using 40000 to correspond exactly to PEDESTRIAN_CLOSE_RANGE (2.0m)
+            if area > 40000:
                 self.person_detected_time = time.time()
                 self.get_logger().warn(f"EMERGENCY BRAKE! Pedestrian detected very close! (Area: {area})")
 

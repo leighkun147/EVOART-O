@@ -35,50 +35,23 @@
 
 ## 🚀 Quick Start (For Teammates)
 
-> **If you just cloned this repo and want to test the simulation, follow these steps exactly.**
+### 🏎️ Quick Testing
+If you want to jump straight into the simulation under a virtual environment, run these commands from your workspace root:
 
 ```bash
-# 1. Clone and enter the project
-git clone https://github.com/leighkun147/EVOART-O.git
-cd EVOART-O
-
-# 2. Create the Python virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# 3. Install ROS 2 dependencies
-sudo apt update
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
-
-# 4. Build all packages
-colcon build --packages-up-to evoart_bringup
-
-# 5. Source the workspace
+cd ~/Desktop/EVOART-O
+colcon build --packages-select evoart_bringup evoart_brain
 source install/setup.bash
-
-# 6. Launch the full autonomous simulation
 ros2 launch evoart_bringup sim_full.launch.py
 ```
 
-**That's it — one terminal, zero manual effort.** The simulation will:
-- Start Gazebo with the TEKNOFEST city world
-- Spawn the vehicle at position (2, 0)
-- Activate mock perception, traffic lights, and safety systems
-- Start SLAM Toolbox for mapping
-- Launch the full Nav2 navigation stack
-- Begin autonomous route execution through the city
-
-### Optional: Launch RViz2 Visualization
-
-In a **separate terminal**:
-```bash
-cd ~/Desktop/EVOART-O
-source install/setup.bash
-env -u GTK_PATH ros2 launch evoart_bringup rviz.launch.py
-```
-
-> **Note:** The `env -u GTK_PATH` prefix is required to prevent a GTK theme conflict between the system and ROS 2. Without it, RViz may crash on startup.
+> **Note:** If the "Timed out waiting for transform" error appears, open a second terminal and run:
+> ```bash
+> source install/setup.bash
+> ros2 topic hz /odom
+> ros2 topic hz /clock
+> ```
+> This verifies if Gazebo is sending data. If both show 0 Hz, the issue is with the Gazebo bridge; otherwise, it's a TF sync issue.
 
 ---
 

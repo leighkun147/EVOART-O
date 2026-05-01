@@ -161,6 +161,7 @@ def generate_launch_description():
         name='lifecycle_manager_navigation',
         output='screen',
         parameters=[{
+            'use_sim_time': True,
             'autostart': True,
             'node_names': [
                 'planner_server',
@@ -173,7 +174,7 @@ def generate_launch_description():
     )
 
     nav2_delayed = TimerAction(
-        period=15.0,
+        period=20.0,
         actions=[
             nav2_planner,
             nav2_controller,
@@ -186,7 +187,7 @@ def generate_launch_description():
 
     # ═══ LAYER 6: GeoJSON Route Navigator ═══
     geojson_navigator = TimerAction(
-        period=30.0,
+        period=40.0,
         actions=[
             Node(
                 package='evoart_brain',

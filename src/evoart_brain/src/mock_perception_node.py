@@ -53,7 +53,7 @@ STOP_SIGN_POSITIONS = [
 
 # Detection thresholds (meters) — IP-7 Spec: 3-5m trigger radius
 PEDESTRIAN_DETECT_RANGE = 8.0    # Camera FOV range
-PEDESTRIAN_CLOSE_RANGE = 3.0     # Emergency brake range
+PEDESTRIAN_CLOSE_RANGE = 2.0     # Emergency brake range (reduced from 3.0 to avoid spawn conflict)
 TRAFFIC_LIGHT_DETECT_RANGE = 5.0  # IP-7: 3-5m trigger zone
 STOP_SIGN_DETECT_RANGE = 5.0      # IP-7: 3-5m trigger zone
 
@@ -77,9 +77,11 @@ class MockPerceptionNode(Node):
             TrafficStatus, '/yolo/traffic_lights', 10
         )
 
-        # Vehicle position
+        # Vehicle position and heading
         self.x = 0.0
         self.y = 0.0
+        self.yaw = 0.0
+        self.startup_time = self.get_clock().now()
 
         # Traffic light state machine (shared with traffic_light_node.py)
         # We subscribe to it instead of duplicating
@@ -101,9 +103,15 @@ class MockPerceptionNode(Node):
         )
 
     def odom_callback(self, msg: Odometry):
-        """Update vehicle position from odometry."""
+        """Update vehicle position and heading from odometry."""
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
+        
+        # Extract yaw from quaternion
+        q = msg.pose.pose.orientation
+        siny_cosp = 2 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
+        self.yaw = math.atan2(siny_cosp, cosy_cosp)
 
     def traffic_state_callback(self, msg: TrafficStatus):
         """Receive ground-truth traffic light state from the simulator."""
@@ -112,6 +120,14 @@ class MockPerceptionNode(Node):
 
     def _distance_to(self, px: float, py: float) -> float:
         return math.hypot(self.x - px, self.y - py)
+        
+    def _is_in_front(self, px: float, py: float, fov_degrees: float = 120.0) -> bool:
+        """Check if an object is in front of the vehicle based on its yaw."""
+        angle_to_target = math.atan2(py - self.y, px - self.x)
+        # Normalize angle difference to [-pi, pi]
+        angle_diff = (angle_to_target - self.yaw + math.pi) % (2 * math.pi) - math.pi
+        fov_rad = math.radians(fov_degrees)
+        return abs(angle_diff) <= (fov_rad / 2)
 
     def _range_to_bbox_area(self, distance: float, close_range: float) -> int:
         """
@@ -126,11 +142,18 @@ class MockPerceptionNode(Node):
 
     def tick(self):
         """Scan all known objects and publish detections."""
+        
+        # ── 5s Startup Delay ──
+        # Let the car spawn and navigation start before triggering safeties
+        if (self.get_clock().now() - self.startup_time).nanoseconds < 5e9:
+            return
 
         # ── Pedestrians ──
         for i, (px, py) in enumerate(PEDESTRIAN_POSITIONS):
             dist = self._distance_to(px, py)
-            if dist < PEDESTRIAN_DETECT_RANGE:
+            
+            # Only detect if within range AND in front of the vehicle
+            if dist < PEDESTRIAN_DETECT_RANGE and self._is_in_front(px, py):
                 area = self._range_to_bbox_area(dist, PEDESTRIAN_CLOSE_RANGE)
                 # Simulate a bounding box centered in the frame
                 cx, cy = 320, 240
