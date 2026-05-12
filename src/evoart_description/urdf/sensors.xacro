@@ -41,7 +41,7 @@
       <always_on>true</always_on>
       <visualize>true</visualize>
       <topic>camera/image_raw</topic>
-      <ignition_frame_id>camera_link</ignition_frame_id>
+      <gz_frame_id>camera_link</gz_frame_id>
       <camera>
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
@@ -64,7 +64,7 @@
       <update_rate>10</update_rate>
       <always_on>true</always_on>
       <topic>scan</topic>
-      <ignition_frame_id>velodyne</ignition_frame_id>
+      <gz_frame_id>velodyne</gz_frame_id>
       <ray>
         <scan>
           <horizontal>

@@ -111,9 +111,9 @@
   <xacro:wheel prefix="front_left" is_front="true" x="${wheelbase}" y="${track_width/2}"/>
   <xacro:wheel prefix="front_right" is_front="true" x="${wheelbase}" y="${-track_width/2}"/>
 
-  <!-- Ignition / modern Gazebo Plugins -->
+  <!-- Gazebo Harmonic (v8) Plugins -->
   <gazebo>
-    <plugin filename="ignition-gazebo-ackermann-steering-system" name="ignition::gazebo::systems::AckermannSteering">
+    <plugin filename="gz-sim-ackermann-steering-system" name="gz::sim::systems::AckermannSteering">
       <left_joint>rear_left_wheel_joint</left_joint>
       <right_joint>rear_right_wheel_joint</right_joint>
       <left_steering_joint>front_left_steering_joint</left_steering_joint>
@@ -131,7 +131,7 @@
       <child_frame_id>base_link</child_frame_id>
     </plugin>
 
-    <plugin filename="ignition-gazebo-joint-state-publisher-system" name="ignition::gazebo::systems::JointStatePublisher">
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
       <topic>joint_states</topic>
       <joint_name>front_left_steering_joint</joint_name>
       <joint_name>front_right_steering_joint</joint_name>

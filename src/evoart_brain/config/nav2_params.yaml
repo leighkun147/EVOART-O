@@ -76,8 +76,8 @@ controller_server:
     general_goal_checker:
       stateful: true
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 1.0
-      yaw_goal_tolerance: 1.0
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.15
 
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
@@ -116,9 +116,8 @@ controller_server:
         cost_power: 1
         repulsion_weight: 1.5
         critical_weight: 20.0
-        consider_footprint: true
         collision_cost: 10000.0
-        collision_margin_distance: 0.15
+        collision_margin_distance: 0.40
         near_goal_distance: 0.5
       GoalCritic:
         enabled: true
@@ -238,8 +237,8 @@ local_costmap:
           obstacle_min_range: 0.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 1.5
-        inflation_radius: 1.5
+        cost_scaling_factor: 5.0
+        inflation_radius: 1.0
 
 # ── Global Costmap ──
 # NOTE: Using rolling_window + obstacle_layer (no static_layer) because
@@ -278,8 +277,8 @@ global_costmap:
           obstacle_min_range: 0.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 1.5
-        inflation_radius: 1.5
+        cost_scaling_factor: 5.0
+        inflation_radius: 1.0
 
 # ── Map Server (for loading saved maps) ──
 map_server:
