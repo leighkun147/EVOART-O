@@ -238,7 +238,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 5.0
-        inflation_radius: 1.0
+        inflation_radius: 1.2
 
 # ── Global Costmap ──
 # NOTE: Using rolling_window + obstacle_layer (no static_layer) because
@@ -253,14 +253,15 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       footprint: "[[1.0, 0.525], [1.0, -0.525], [-1.0, -0.525], [-1.0, 0.525]]"
-      resolution: 0.1
-      # Use rolling_window for global costmap too — avoids "robot out of bounds"
-      # errors when SLAM map is small or not yet available
-      rolling_window: true
-      width: 200
-      height: 50
-      track_unknown_space: false
-      plugins: ["obstacle_layer", "inflation_layer"]
+      resolution: 0.25
+      # Static layer auto-sizes the costmap to the map dimensions
+      rolling_window: false
+      track_unknown_space: true
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+        enabled: true
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true
@@ -278,13 +279,13 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 5.0
-        inflation_radius: 1.0
+        inflation_radius: 1.2
 
 # ── Map Server (for loading saved maps) ──
 map_server:
   ros__parameters:
     use_sim_time: true
-    yaml_filename: ""
+    yaml_filename: "/home/leykun/Desktop/EVOART-O/src/evoart_brain/maps/pist_map_small.yaml"
     topic_name: "map"
     frame_id: "map"
 

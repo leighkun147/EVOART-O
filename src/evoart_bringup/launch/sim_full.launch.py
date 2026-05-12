@@ -55,14 +55,9 @@ def generate_launch_description():
     )
 
     # ═══ LAYER 2: TF Foundation ═══
-    # Static map→odom (identity). SLAM will refine later.
-    static_map_to_odom = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_map_to_odom',
-        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
-        output='screen'
-    )
+    # NOTE: map→odom is now published by AMCL (tf_broadcast: true).
+    # Do NOT launch a static map→odom publisher — it will fight AMCL
+    # and cause TF flickering / RViz chaos.
 
     static_velodyne_tf = Node(
         package='tf2_ros',
@@ -122,18 +117,21 @@ def generate_launch_description():
         }]
     )
 
-    # ═══ LAYER 4: SLAM (mapping) ═══
-    slam_node = TimerAction(
-        period=10.0,
-        actions=[
-            Node(
-                package='slam_toolbox',
-                executable='async_slam_toolbox_node',
-                name='slam_toolbox',
-                output='screen',
-                parameters=[slam_params]
-            )
-        ]
+    # ═══ LAYER 4: Localization (Map Server & AMCL) ═══
+    map_server = Node(
+        package='nav2_map_server',
+        executable='map_server',
+        name='map_server',
+        output='screen',
+        parameters=[nav2_params]
+    )
+
+    amcl_node = Node(
+        package='nav2_amcl',
+        executable='amcl',
+        name='amcl',
+        output='screen',
+        parameters=[nav2_params]
     )
 
     # ═══ LAYER 5: Nav2 Stack ═══
@@ -201,6 +199,8 @@ def generate_launch_description():
         parameters=[{
             'autostart': True,
             'node_names': [
+                'map_server',
+                'amcl',
                 'planner_server',
                 'controller_server',
                 'bt_navigator',
@@ -213,6 +213,8 @@ def generate_launch_description():
     nav2_delayed = TimerAction(
         period=15.0,
         actions=[
+            map_server,
+            amcl_node,
             nav2_planner,
             nav2_controller,
             nav2_bt_navigator,
@@ -260,7 +262,7 @@ def generate_launch_description():
         # Layer 1: Simulation
         sim_launch,
         # Layer 2: TF (must start immediately)
-        static_map_to_odom,
+        # NOTE: map→odom is handled by AMCL, not a static publisher
         static_velodyne_tf,
         static_camera_tf,
         odom_tf_node,
@@ -268,8 +270,7 @@ def generate_launch_description():
         safety_node,
         traffic_light_node,
         mock_perception_node,
-        # Layer 4: Mapping
-        slam_node,
+        # Layer 4: Mapping (Replaced by Map Server & AMCL in Nav2 Delayed)
         # Layer 5: Navigation
         nav2_delayed,
         # Layer 6: Mission
