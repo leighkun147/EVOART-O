@@ -17,6 +17,10 @@ TF Chain:
   base_link → chassis  (robot_state_publisher from URDF)
   chassis → velodyne   (robot_state_publisher from URDF)
 
+Topic Chain (cmd_vel):
+  Nav2 Controller ──► /cmd_vel_raw ──► Velocity Smoother ──► /cmd_vel_nav ──► Safety Stop ──► /cmd_vel ──► Gazebo
+                   (remapped)                              (remapped)
+
 Usage:
   source install/setup.bash
   ros2 launch evoart_bringup sim_full.launch.py
@@ -33,11 +37,13 @@ from launch_ros.actions import Node, SetParameter
 def generate_launch_description():
     pkg_bringup = get_package_share_directory('evoart_bringup')
     pkg_brain = get_package_share_directory('evoart_brain')
+    pkg_description = get_package_share_directory('evoart_description')
 
     nav2_params = os.path.join(pkg_brain, 'config', 'nav2_params.yaml')
     slam_params = os.path.join(pkg_brain, 'config', 'slam_params.yaml')
     bt_xml = os.path.join(pkg_brain, 'behavior_trees', 'taxi_logic.xml')
     route_file = os.path.join(pkg_brain, 'config', 'route.geojson')
+    rviz_config = os.path.join(pkg_description, 'rviz', 'nav_view.rviz')
 
     use_sim_time = SetParameter(name='use_sim_time', value=True)
 
@@ -55,6 +61,22 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='static_map_to_odom',
         arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+        output='screen'
+    )
+
+    static_velodyne_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_velodyne_tf',
+        arguments=['0', '0', '0', '0', '0', '0', 'velodyne', 'evoart/base_link/vlp16_lidar'],
+        output='screen'
+    )
+
+    static_camera_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_camera_tf',
+        arguments=['0', '0', '0', '0', '0', '0', 'camera_link', 'evoart/base_link/zed2i_camera'],
         output='screen'
     )
 
@@ -115,6 +137,12 @@ def generate_launch_description():
     )
 
     # ═══ LAYER 5: Nav2 Stack ═══
+    # CRITICAL: Topic remapping chain
+    #   controller_server publishes to /cmd_vel by default
+    #   We remap it to /cmd_vel_raw so velocity_smoother can consume it
+    #   velocity_smoother outputs to /cmd_vel_nav (via remapping)
+    #   safety_stop_node listens on /cmd_vel_nav and outputs to /cmd_vel
+
     nav2_planner = Node(
         package='nav2_planner',
         executable='planner_server',
@@ -128,7 +156,10 @@ def generate_launch_description():
         executable='controller_server',
         name='controller_server',
         output='screen',
-        parameters=[nav2_params]
+        parameters=[nav2_params],
+        remappings=[
+            ('cmd_vel', 'cmd_vel_raw'),  # Controller output → velocity smoother input
+        ]
     )
 
     nav2_bt_navigator = Node(
@@ -136,7 +167,10 @@ def generate_launch_description():
         executable='bt_navigator',
         name='bt_navigator',
         output='screen',
-        parameters=[nav2_params, {'default_bt_xml_filename': bt_xml}]
+        parameters=[nav2_params, {
+            'default_nav_to_pose_bt_xml': bt_xml,
+            'default_bt_xml_filename': bt_xml,
+        }]
     )
 
     nav2_behaviors = Node(
@@ -152,7 +186,11 @@ def generate_launch_description():
         executable='velocity_smoother',
         name='velocity_smoother',
         output='screen',
-        parameters=[nav2_params]
+        parameters=[nav2_params],
+        remappings=[
+            ('cmd_vel', 'cmd_vel_raw'),       # Input: from controller_server
+            ('cmd_vel_smoothed', 'cmd_vel_nav'),  # Output: to safety_stop_node
+        ]
     )
 
     nav2_lifecycle_manager = Node(
@@ -202,12 +240,29 @@ def generate_launch_description():
         ]
     )
 
+    # ═══ LAYER 7: RViz2 Görselleştirme ═══
+    rviz_node = TimerAction(
+        period=5.0,
+        actions=[
+            Node(
+                package='rviz2',
+                executable='rviz2',
+                name='rviz2',
+                arguments=['-d', rviz_config],
+                output='screen',
+                parameters=[{'use_sim_time': True}]
+            )
+        ]
+    )
+
     return LaunchDescription([
         use_sim_time,
         # Layer 1: Simulation
         sim_launch,
         # Layer 2: TF (must start immediately)
         static_map_to_odom,
+        static_velodyne_tf,
+        static_camera_tf,
         odom_tf_node,
         # Layer 3: Perception & Reflexes
         safety_node,
@@ -219,4 +274,6 @@ def generate_launch_description():
         nav2_delayed,
         # Layer 6: Mission
         geojson_navigator,
+        # Layer 7: RViz
+        rviz_node,
     ])

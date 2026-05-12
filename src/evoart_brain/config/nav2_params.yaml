@@ -3,6 +3,10 @@
 # ═══════════════════════════════════════════════════════════════════
 # Vehicle: Ackermann-steered, wheelbase = 1.425m, track width = 1.05m
 # Minimum turning radius: 1.5m
+#
+# Topic Chain (CRITICAL):
+#   Nav2 Controller → /cmd_vel_nav → Safety Stop → /cmd_vel → Gazebo
+#   (Velocity Smoother is integrated inside the controller output)
 # ═══════════════════════════════════════════════════════════════════
 
 # ── BT Navigator ──
@@ -14,6 +18,8 @@ bt_navigator:
     odom_topic: /odom
     bt_loop_duration: 10
     default_server_timeout: 20
+    # CRITICAL: Only enable navigate_to_pose — do NOT load navigate_through_poses
+    # which requires Spin behavior (not available for Ackermann vehicles)
     navigators: ["navigate_to_pose"]
     navigate_to_pose:
       plugin: "nav2_bt_navigator::NavigateToPoseNavigator"
@@ -27,7 +33,7 @@ planner_server:
 
     GridBased:
       plugin: "nav2_smac_planner::SmacPlannerHybrid"
-      tolerance: 0.25                     # Goal tolerance (m)
+      tolerance: 0.5                      # Goal tolerance (m) — relaxed for Ackermann
       downsample_costmap: false
       downsampling_factor: 1
       allow_unknown: true
@@ -49,12 +55,14 @@ planner_server:
       retrospective_penalty: 0.015
 
 # ── Controller Server (MPPI for Ackermann) ──
+# IMPORTANT: The controller publishes to /cmd_vel_nav by default (via remapping in launch)
+# Safety Stop node listens on /cmd_vel_nav and republishes on /cmd_vel
 controller_server:
   ros__parameters:
     use_sim_time: true
     controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.5
+    min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
     progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["general_goal_checker"]
@@ -63,13 +71,13 @@ controller_server:
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
-      movement_time_allowance: 10.0
+      movement_time_allowance: 30.0
 
     general_goal_checker:
       stateful: true
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.35
-      yaw_goal_tolerance: 0.25
+      xy_goal_tolerance: 1.0
+      yaw_goal_tolerance: 1.0
 
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
@@ -78,30 +86,40 @@ controller_server:
       batch_size: 2000
       vx_std: 0.2
       vy_std: 0.0
-      wz_std: 0.4
+      wz_std: 0.2
       vx_max: 1.39
-      vx_min: -0.5
+      vx_min: 0.0
       vy_max: 0.0
-      wz_max: 1.9
+      wz_max: 0.8
       iteration_count: 1
-      prune_distance: 1.7
+      prune_distance: 2.0
       transform_tolerance: 0.1
-      temperature: 0.3
+      temperature: 0.25
       gamma: 0.015
       motion_model: "Ackermann"
       visualize: false
+      retry_attempt_limit: 1
       TrajectoryVisualizer:
         trajectory_step: 5
         time_step: 3
       AckermannConstraints:
         min_turning_r: 1.5               # Must match planner
-      critics: ["ConstraintCritic", "CostCritic", "GoalCritic",
+      critics: ["ConstraintCritic", "ObstaclesCritic", "CostCritic", "GoalCritic",
                 "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic",
                 "PathAngleCritic", "PreferForwardCritic"]
       ConstraintCritic:
         enabled: true
         cost_power: 1
         cost_weight: 4.0
+      ObstaclesCritic:
+        enabled: true
+        cost_power: 1
+        repulsion_weight: 1.5
+        critical_weight: 20.0
+        consider_footprint: true
+        collision_cost: 10000.0
+        collision_margin_distance: 0.15
+        near_goal_distance: 0.5
       GoalCritic:
         enabled: true
         cost_power: 1
@@ -122,14 +140,15 @@ controller_server:
         cost_power: 1
         cost_weight: 3.81
         critical_cost: 300.0
-        consider_footprint: false
-        collision_cost: 1000000.0
+        consider_footprint: true
+        collision_cost: 10000.0
         near_goal_distance: 1.0
+        trajectory_point_step: 2
       PathAlignCritic:
         enabled: true
         cost_power: 1
         cost_weight: 14.0
-        max_path_occupancy_ratio: 0.05
+        max_path_occupancy_ratio: 0.07
         trajectory_point_step: 4
         threshold_to_consider: 0.5
         offset_from_furthest: 20
@@ -149,6 +168,10 @@ controller_server:
         max_angle_to_furthest: 1.0
 
 # ── Behavior Server ──
+# CRITICAL: Must include ALL behaviors referenced by any loaded BT XML.
+# The default navigate_through_poses BT uses Spin, but Spin is invalid for
+# Ackermann vehicles. We add it anyway to prevent the plugin loader from
+# crashing, but the BT won't actually call it since we only use navigate_to_pose.
 behavior_server:
   ros__parameters:
     use_sim_time: true
@@ -157,25 +180,29 @@ behavior_server:
     local_footprint_topic: local_costmap/published_footprint
     global_footprint_topic: global_costmap/published_footprint
     cycle_frequency: 10.0
-    behavior_plugins: ["spin", "backup", "wait"]
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
     spin:
       plugin: "nav2_behaviors::Spin"
     backup:
       plugin: "nav2_behaviors::BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors::DriveOnHeading"
     wait:
       plugin: "nav2_behaviors::Wait"
 
 # ── Velocity Smoother ──
+# Input: /cmd_vel_raw (from controller_server via remapping)
+# Output: /cmd_vel_nav (safety_stop listens here)
 velocity_smoother:
   ros__parameters:
     use_sim_time: true
     smoothing_frequency: 20.0
     scale_velocities: false
     feedback: "OPEN_LOOP"
-    max_velocity: [1.39, 0.0, 1.9]
-    min_velocity: [-0.5, 0.0, -1.9]
-    max_accel: [2.5, 0.0, 3.2]
-    max_decel: [-2.5, 0.0, -3.2]
+    max_velocity: [1.39, 0.0, 0.8]
+    min_velocity: [0.0, 0.0, -0.8]
+    max_accel: [2.5, 0.0, 1.5]
+    max_decel: [-2.5, 0.0, -1.5]
     odom_topic: "odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
@@ -190,8 +217,8 @@ local_costmap:
       global_frame: odom
       robot_base_frame: base_link
       rolling_window: true
-      width: 5
-      height: 5
+      width: 12
+      height: 12
       resolution: 0.05
       footprint: "[[1.0, 0.525], [1.0, -0.525], [-1.0, -0.525], [-1.0, 0.525]]"
       plugins: ["obstacle_layer", "inflation_layer"]
@@ -205,16 +232,19 @@ local_costmap:
           clearing: true
           marking: true
           data_type: "LaserScan"
-          raytrace_max_range: 3.0
+          raytrace_max_range: 6.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 2.5
+          obstacle_max_range: 5.0
           obstacle_min_range: 0.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.8
+        cost_scaling_factor: 1.5
+        inflation_radius: 1.5
 
 # ── Global Costmap ──
+# NOTE: Using rolling_window + obstacle_layer (no static_layer) because
+# we use SLAM for mapping and don't have a pre-saved static map.
+# The static_layer would wait for /map from map_server which we don't use.
 global_costmap:
   global_costmap:
     ros__parameters:
@@ -225,11 +255,13 @@ global_costmap:
       robot_base_frame: base_link
       footprint: "[[1.0, 0.525], [1.0, -0.525], [-1.0, -0.525], [-1.0, 0.525]]"
       resolution: 0.1
-      track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
-      static_layer:
-        plugin: "nav2_costmap_2d::StaticLayer"
-        map_subscribe_transient_local: true
+      # Use rolling_window for global costmap too — avoids "robot out of bounds"
+      # errors when SLAM map is small or not yet available
+      rolling_window: true
+      width: 200
+      height: 50
+      track_unknown_space: false
+      plugins: ["obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true
@@ -240,14 +272,14 @@ global_costmap:
           clearing: true
           marking: true
           data_type: "LaserScan"
-          raytrace_max_range: 3.0
+          raytrace_max_range: 8.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 2.5
+          obstacle_max_range: 6.0
           obstacle_min_range: 0.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.8
+        cost_scaling_factor: 1.5
+        inflation_radius: 1.5
 
 # ── Map Server (for loading saved maps) ──
 map_server:

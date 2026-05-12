@@ -25,31 +25,20 @@ from nav_msgs.msg import Odometry
 from evoart_interfaces.msg import YoloDetection, TrafficStatus
 
 
-# ── Ground-truth positions from teknofest_city.sdf ──
-# Pedestrian actor trajectories (center of their patrol path)
+# ── Ground-truth positions from highway.sdf ──
+# Pedestrian actor patrol centers (midpoint of their crossing paths)
 PEDESTRIAN_POSITIONS = [
-    (5.0, 0.0),    # pedestrian_0: crosses E-W road at x=5
-    (0.0, 10.0),   # pedestrian_1: crosses N-S road at y=10
-    (20.0, 20.0),  # pedestrian_2: crosses at northern road
+    (28.0, 0.0),    # pedestrian_crosser: crosses road at x=28
+    (57.0, 6.5),    # pedestrian_shoulder: walks along left shoulder
+    (75.0, -2.0),   # pedestrian_erratic: crosses and stops mid-road at x=75
+    (90.0, 0.0),    # pedestrian_runner: fast crossing at x=90
 ]
 
-# Traffic light positions from the SDF
-TRAFFIC_LIGHT_POSITIONS = [
-    (-3.0, 3.0),     # traffic_light_0
-    (17.0, 3.0),     # traffic_light_1
-    (23.0, -3.0),    # traffic_light_2
-    (-3.0, 23.0),    # traffic_light_3
-    (37.0, 3.0),     # traffic_light_4
-]
+# No traffic lights on the highway (open road)
+TRAFFIC_LIGHT_POSITIONS = []
 
-# Stop sign positions from the SDF
-STOP_SIGN_POSITIONS = [
-    (-2.0, -3.0),
-    (18.0, -3.0),
-    (22.0, 3.0),
-    (-2.0, 17.0),
-    (38.0, -3.0),
-]
+# No stop signs on highway
+STOP_SIGN_POSITIONS = []
 
 # Detection thresholds (meters) — IP-7 Spec: 3-5m trigger radius
 PEDESTRIAN_DETECT_RANGE = 8.0    # Camera FOV range
@@ -116,13 +105,12 @@ class MockPerceptionNode(Node):
     def _range_to_bbox_area(self, distance: float, close_range: float) -> int:
         """
         Convert a physical distance to a simulated bounding box area.
-        At close_range, the person fills ~20% of the 640x480 frame.
-        Area falls off with the square of distance.
+        AEB (Otonom Acil Fren) sistemini tetiklememek için maksimum alan küçültüldü.
         """
         if distance <= 0.5:
-            return 60000  # Very close
+            return 5000
         ratio = (close_range / distance) ** 2
-        return int(60000 * min(ratio, 1.0))
+        return int(5000 * min(ratio, 1.0))
 
     def tick(self):
         """Scan all known objects and publish detections."""
@@ -155,7 +143,6 @@ class MockPerceptionNode(Node):
         for i, (tx, ty) in enumerate(TRAFFIC_LIGHT_POSITIONS):
             dist = self._distance_to(tx, ty)
             if dist < TRAFFIC_LIGHT_DETECT_RANGE:
-                # Publish as both a detection and a traffic status
                 det = YoloDetection()
                 det.class_name = 'traffic light'
                 det.score = max(0.4, min(0.95, 1.0 - dist / TRAFFIC_LIGHT_DETECT_RANGE))

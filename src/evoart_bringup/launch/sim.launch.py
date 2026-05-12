@@ -26,8 +26,8 @@ def generate_launch_description():
         parameters=[robot_description]
     )
 
-    # ── Gazebo Harmonic ──
-    world_path = os.path.join(pkg_bringup, 'worlds', 'teknofest_city.sdf')
+    # ── Gazebo (Harmonic) ──
+    world_path = os.path.join(pkg_bringup, 'worlds', 'highway.sdf')
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
@@ -43,26 +43,34 @@ def generate_launch_description():
             '-name', 'evoart',
             '-topic', 'robot_description',
             '-x', '2.0',
-            '-y', '0.0',
+            '-y', '-2.0',
             '-z', '0.5',
         ],
         output='screen'
     )
 
     # ── ROS↔Gazebo Bridge ──
+    # IMPORTANT: This system uses Gazebo Harmonic (v8) on ROS 2 Jazzy.
+    # Message types use gz.msgs.* format.
+    #
+    # CRITICAL NOTES:
+    #   - DO NOT bridge /tf here! The Ackermann plugin does NOT publish TF.
+    #     odom_tf_broadcaster.py handles odom→base_link TF from /odom data.
+    #   - /cmd_vel: ROS → Gazebo (] means ROS-to-GZ)
+    #   - /odom: Gazebo → ROS ([ means GZ-to-ROS)
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
             # Clock (CRITICAL: required for use_sim_time)
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-            # ROS → Gazebo
+            # ROS → Gazebo (vehicle commands)
             '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
-            # Gazebo → ROS
+            # Gazebo → ROS (sensor data & odometry)
             '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
             '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
-            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+            # Joint states for RSP (Gazebo → ROS)
             '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
         ],
         output='screen'

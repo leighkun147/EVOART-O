@@ -1,23 +1,46 @@
 <root BTCPP_format="4" main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
-    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+    <RecoveryNode number_of_retries="10" name="NavigateRecovery">
+      
+      <!-- Ana Navigasyon Döngüsü -->
+      <!-- Replanning hızını artırarak engellere daha hızlı tepki ver -->
       <PipelineSequence name="NavigateWithReplanning">
-        <RateController hz="1.0">
+        <RateController hz="2.0">
           <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
         </RateController>
         <FollowPath path="{path}" controller_id="FollowPath"/>
       </PipelineSequence>
+
+      <!-- Araç Sıkıştığında Devreye Giren Kurtarma (Recovery) Senaryosu -->
       <ReactiveFallback name="RecoveryFallback">
         <GoalUpdated/>
-        <SequenceStar>
-          <ClearEntireCostmap name="ClearLocalCostmap"
-            service_name="local_costmap/clear_entirely_local_costmap"/>
-          <ClearEntireCostmap name="ClearGlobalCostmap"
-            service_name="global_costmap/clear_entirely_global_costmap"/>
-          <Spin spin_dist="1.57"/>
-          <Wait wait_duration="5"/>
-        </SequenceStar>
+        <RoundRobin name="RecoveryActions">
+          
+          <!-- Strateji 1: Costmap temizle ve yeniden planla -->
+          <Sequence name="ClearAndReplan">
+            <ClearEntireCostmap name="ClearLocalCostmap" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap" service_name="global_costmap/clear_entirely_global_costmap"/>
+            <Wait wait_duration="2.0"/>
+          </Sequence>
+
+          <!-- Strateji 2: Geri git, costmap temizle -->
+          <Sequence name="BackUpAndClear">
+            <BackUp backup_dist="1.5" backup_speed="0.3" name="BackUpRecovery"/>
+            <ClearEntireCostmap name="ClearLocalCostmap2" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap2" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </Sequence>
+
+          <!-- Strateji 3: Daha fazla geri git ve bekle -->
+          <Sequence name="LongBackUpAndWait">
+            <BackUp backup_dist="2.5" backup_speed="0.3" name="LongBackUpRecovery"/>
+            <ClearEntireCostmap name="ClearLocalCostmap3" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap3" service_name="global_costmap/clear_entirely_global_costmap"/>
+            <Wait wait_duration="5.0"/>
+          </Sequence>
+
+        </RoundRobin>
       </ReactiveFallback>
+      
     </RecoveryNode>
   </BehaviorTree>
 </root>

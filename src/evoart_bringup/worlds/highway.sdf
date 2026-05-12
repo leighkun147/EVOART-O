@@ -1,0 +1,329 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <world name="highway_world">
+    <physics name="fast_physics" type="ignored">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="ignition-gazebo-user-commands-system" name="ignition::gazebo::systems::UserCommands"/>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="ignition-gazebo-contact-system" name="ignition::gazebo::systems::Contact"/>
+
+    <scene>
+      <ambient>0.8 0.8 0.8 1.0</ambient>
+      <background>0.4 0.7 0.95 1.0</background>
+      <shadows>false</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 50 0 0 0</pose>
+      <diffuse>0.9 0.9 0.85 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground plane (prevents vehicle from falling into void) -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>400 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>400 100</size></plane></geometry>
+          <material>
+            <ambient>0.1 0.15 0.05 1</ambient>
+            <diffuse>0.15 0.2 0.08 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ═══════════ ROAD SURFACE ═══════════ -->
+    <!-- Main 3-lane highway (each lane ~3.5m, total ~10.5m wide) -->
+    <model name="highway_road">
+      <static>true</static>
+      <pose>60 0 0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>200 12 0.1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>200 12 0.1</size></box></geometry>
+          <material>
+            <ambient>0.18 0.18 0.18 1</ambient>
+            <diffuse>0.22 0.22 0.22 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Shoulder left -->
+    <model name="shoulder_left">
+      <static>true</static>
+      <pose>60 7.5 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>200 3 0.001</size></box></geometry>
+          <material>
+            <ambient>0.3 0.3 0.28 1</ambient>
+            <diffuse>0.35 0.35 0.32 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Shoulder right -->
+    <model name="shoulder_right">
+      <static>true</static>
+      <pose>60 -7.5 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>200 3 0.001</size></box></geometry>
+          <material>
+            <ambient>0.3 0.3 0.28 1</ambient>
+            <diffuse>0.35 0.35 0.32 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ═══════════ LANE MARKINGS ═══════════ -->
+    <!-- Center dashed line (y=0) -->
+    <model name="center_line_0"><static>true</static><pose>5 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_1"><static>true</static><pose>10 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_2"><static>true</static><pose>15 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_3"><static>true</static><pose>20 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_4"><static>true</static><pose>25 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_5"><static>true</static><pose>30 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_6"><static>true</static><pose>35 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_7"><static>true</static><pose>40 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_8"><static>true</static><pose>45 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_9"><static>true</static><pose>50 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_10"><static>true</static><pose>55 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_11"><static>true</static><pose>60 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_12"><static>true</static><pose>65 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+    <model name="center_line_13"><static>true</static><pose>70 0 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>3 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.1 1</ambient><diffuse>1 1 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- Road edge lines (solid white) -->
+    <model name="edge_left"><static>true</static><pose>60 5.8 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>200 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.9 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+    <model name="edge_right"><static>true</static><pose>60 -5.8 0.052 0 0 0</pose><link name="l"><visual name="v"><geometry><box><size>200 0.15 0.005</size></box></geometry><material><ambient>0.9 0.9 0.9 1</ambient><diffuse>1 1 1 1</diffuse></material></visual></link></model>
+
+    <!-- ═══════════ HIGHWAY BARRIERS (concrete jersey walls) ═══════════ -->
+    <model name="barrier_left">
+      <static>true</static>
+      <pose>60 9.5 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>200 0.5 0.8</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>200 0.5 0.8</size></box></geometry>
+          <material><ambient>0.6 0.6 0.55 1</ambient><diffuse>0.7 0.7 0.65 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="barrier_right">
+      <static>true</static>
+      <pose>60 -9.5 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>200 0.5 0.8</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>200 0.5 0.8</size></box></geometry>
+          <material><ambient>0.6 0.6 0.55 1</ambient><diffuse>0.7 0.7 0.65 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ═══════════ STATIC OBSTACLES ═══════════ -->
+
+    <!-- 1. Broken-down vehicle (large box, right lane) at x=18 -->
+    <model name="broken_car">
+      <static>true</static>
+      <pose>18.0 -2.5 0.6 0 0 0.05</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>4.0 1.8 1.2</size></box></geometry></collision>
+        <visual name="body"><geometry><box><size>4.0 1.8 1.2</size></box></geometry>
+          <material><ambient>0.15 0.15 0.5 1</ambient><diffuse>0.2 0.2 0.6 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 2. Traffic cones around broken car -->
+    <model name="cone_1"><static>true</static><pose>14.0 -1.0 0.25 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.9 0.4 0.0 1</ambient><diffuse>1.0 0.5 0.0 1</diffuse></material></visual></link></model>
+    <model name="cone_2"><static>true</static><pose>15.5 -1.3 0.25 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.9 0.4 0.0 1</ambient><diffuse>1.0 0.5 0.0 1</diffuse></material></visual></link></model>
+    <model name="cone_3"><static>true</static><pose>17.0 -1.3 0.25 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.9 0.4 0.0 1</ambient><diffuse>1.0 0.5 0.0 1</diffuse></material></visual></link></model>
+    <model name="cone_4"><static>true</static><pose>19.0 -1.3 0.25 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.9 0.4 0.0 1</ambient><diffuse>1.0 0.5 0.0 1</diffuse></material></visual></link></model>
+    <model name="cone_5"><static>true</static><pose>20.5 -1.3 0.25 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.9 0.4 0.0 1</ambient><diffuse>1.0 0.5 0.0 1</diffuse></material></visual></link></model>
+    <model name="cone_6"><static>true</static><pose>22.0 -1.0 0.25 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry><material><ambient>0.9 0.4 0.0 1</ambient><diffuse>1.0 0.5 0.0 1</diffuse></material></visual></link></model>
+
+    <!-- 3. Construction barricade (left lane) at x=35 -->
+    <model name="barricade_1">
+      <static>true</static>
+      <pose>35.0 2.5 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>2.0 0.3 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>2.0 0.3 1.0</size></box></geometry>
+          <material><ambient>0.9 0.5 0.0 1</ambient><diffuse>1.0 0.6 0.0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="barricade_2">
+      <static>true</static>
+      <pose>37.5 2.5 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>2.0 0.3 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>2.0 0.3 1.0</size></box></geometry>
+          <material><ambient>0.9 0.5 0.0 1</ambient><diffuse>1.0 0.6 0.0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 4. Large debris/rock on road at x=50 -->
+    <model name="debris_rock">
+      <static>true</static>
+      <pose>50.0 0.5 0.35 0.1 0.15 0.3</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>1.2 0.8 0.7</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>1.2 0.8 0.7</size></box></geometry>
+          <material><ambient>0.4 0.35 0.3 1</ambient><diffuse>0.5 0.45 0.4 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 5. Parked truck on shoulder at x=65 (partially blocks right lane) -->
+    <model name="parked_truck">
+      <static>true</static>
+      <pose>65.0 -4.5 1.2 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>8.0 2.4 2.4</size></box></geometry></collision>
+        <visual name="body"><geometry><box><size>8.0 2.4 2.4</size></box></geometry>
+          <material><ambient>0.6 0.1 0.1 1</ambient><diffuse>0.7 0.15 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 6. Water barrels at x=80 -->
+    <model name="barrel_1"><static>true</static><pose>80.0 1.5 0.45 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.35</radius><length>0.9</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.35</radius><length>0.9</length></cylinder></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>1.0 0.9 0.2 1</diffuse></material></visual></link></model>
+    <model name="barrel_2"><static>true</static><pose>80.0 -1.5 0.45 0 0 0</pose><link name="l"><collision name="c"><geometry><cylinder><radius>0.35</radius><length>0.9</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.35</radius><length>0.9</length></cylinder></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>1.0 0.9 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- 7. Fallen tree across half the road at x=95 -->
+    <model name="fallen_tree">
+      <static>true</static>
+      <pose>95.0 3.0 0.2 0 0 -0.3</pose>
+      <link name="link">
+        <collision name="col"><geometry><cylinder><radius>0.2</radius><length>6.0</length></cylinder></geometry>
+          <pose>0 0 0 0 1.5707 0</pose>
+        </collision>
+        <visual name="vis"><geometry><cylinder><radius>0.2</radius><length>6.0</length></cylinder></geometry>
+          <pose>0 0 0 0 1.5707 0</pose>
+          <material><ambient>0.35 0.25 0.1 1</ambient><diffuse>0.45 0.3 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ═══════════ MOVING ACTORS (Pedestrians) ═══════════ -->
+
+    <!-- Pedestrian crossing road at x=28 -->
+    <actor name="pedestrian_crosser">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walk">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint><time>0</time><pose>28 -7 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>10</time><pose>28 7 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>12</time><pose>28 7 0 0 0 -1.5707</pose></waypoint>
+          <waypoint><time>22</time><pose>28 -7 0 0 0 -1.5707</pose></waypoint>
+          <waypoint><time>24</time><pose>28 -7 0 0 0 1.5707</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- Pedestrian walking along shoulder at x=55 -->
+    <actor name="pedestrian_shoulder">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walk">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>3.0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint><time>0</time><pose>52 6.5 0 0 0 0</pose></waypoint>
+          <waypoint><time>12</time><pose>62 6.5 0 0 0 0</pose></waypoint>
+          <waypoint><time>14</time><pose>62 6.5 0 0 0 3.14159</pose></waypoint>
+          <waypoint><time>26</time><pose>52 6.5 0 0 0 3.14159</pose></waypoint>
+          <waypoint><time>28</time><pose>52 6.5 0 0 0 0</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- Pedestrian crossing at x=75 (erratic - stops mid-road) -->
+    <actor name="pedestrian_erratic">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walk">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>5.0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint><time>0</time><pose>75 -8 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>5</time><pose>75 -2 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>10</time><pose>75 -2 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>15</time><pose>75 7 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>17</time><pose>75 7 0 0 0 -1.5707</pose></waypoint>
+          <waypoint><time>27</time><pose>75 -8 0 0 0 -1.5707</pose></waypoint>
+          <waypoint><time>29</time><pose>75 -8 0 0 0 1.5707</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- Pedestrian crossing at x=90 -->
+    <actor name="pedestrian_runner">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walk">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>8.0</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk">
+          <waypoint><time>0</time><pose>90 8 0 0 0 -1.5707</pose></waypoint>
+          <waypoint><time>6</time><pose>90 -8 0 0 0 -1.5707</pose></waypoint>
+          <waypoint><time>8</time><pose>90 -8 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>14</time><pose>90 8 0 0 0 1.5707</pose></waypoint>
+          <waypoint><time>16</time><pose>90 8 0 0 0 -1.5707</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+  </world>
+</sdf>

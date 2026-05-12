@@ -4,24 +4,14 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Teknofest City Route",
-        "description": "A-to-B route following the road network through the TEKNOFEST city. Coordinates are local (x,y) in meters matching the Gazebo world frame."
+        "name": "Highway Start to Finish",
+        "description": "Simple A-to-B highway route. Start: x=10, End: x=90."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [2.0, 0.0],
-          [10.0, 0.0],
-          [20.0, 0.0],
-          [20.0, 5.0],
-          [20.0, 10.0],
-          [20.0, 15.0],
-          [20.0, 20.0],
-          [10.0, 20.0],
-          [0.0, 20.0],
-          [0.0, 10.0],
-          [0.0, 0.0],
-          [2.0, 0.0]
+          [10.0, -2.0],
+          [90.0, -2.0]
         ]
       }
     }
