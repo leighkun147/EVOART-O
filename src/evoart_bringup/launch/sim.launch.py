@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, AppendEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node, SetParameter
 import xacro
@@ -27,7 +27,10 @@ def generate_launch_description():
     )
 
     # ── Gazebo (Harmonic) ──
-    world_path = os.path.join(pkg_bringup, 'worlds', 'highway.sdf')
+    models_dir = os.path.join(pkg_bringup, 'models')
+    set_model_path = AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', models_dir)
+
+    world_path = os.path.join(pkg_bringup, 'worlds', 'robotaksi_pist_2024.sdf')
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
@@ -77,6 +80,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        set_model_path,
         use_sim_time,
         rsp,
         gazebo,

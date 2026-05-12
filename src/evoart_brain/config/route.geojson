@@ -4,14 +4,14 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Highway Start to Finish",
-        "description": "Simple A-to-B highway route. Start: x=10, End: x=90."
+        "name": "Teknofest 2024 Track Route",
+        "description": "Navigate the Teknofest track: Start -> Mandatory Turn -> Bus Stop 1."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [10.0, -2.0],
-          [90.0, -2.0]
+          [18.0, 14.0],
+          [41.9, 36.4]
         ]
       }
     }

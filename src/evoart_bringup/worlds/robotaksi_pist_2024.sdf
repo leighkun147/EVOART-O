@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.8">
+    <world name="empty_world">
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+        <plugin
+            filename="ignition-gazebo-physics-system"
+            name="ignition::gazebo::systems::Physics">
+        </plugin>
+        <plugin
+            filename="ignition-gazebo-sensors-system"
+            name="ignition::gazebo::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+        <plugin
+            filename="ignition-gazebo-scene-broadcaster-system"
+            name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+        <plugin
+            filename="ignition-gazebo-user-commands-system"
+            name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+
+        <!-- ========== SENSOR PLUGINS ========== -->
+        <plugin
+            filename="ignition-gazebo-imu-system"
+            name="gz::sim::systems::Imu">
+        </plugin>
+        <plugin
+            filename="ignition-gazebo-navsat-system"
+            name="ignition::gazebo::systems::NavSat">
+        </plugin>
+
+        <!-- Set the coordinates for the world origin -->
+        <spherical_coordinates>
+            <surface_model>EARTH_WGS84</surface_model>
+            <world_frame_orientation>ENU</world_frame_orientation>
+            <latitude_deg>-22.986687</latitude_deg>
+            <longitude_deg>-43.202501</longitude_deg>
+            <elevation>0</elevation>
+            <heading_deg>0</heading_deg>
+        </spherical_coordinates>
+
+        <light type="directional" name="sun">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <!-- <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>50</mu>
+                            </ode>
+                            <bullet>
+                                <friction>1</friction>
+                                <rolling_friction>0.1</rolling_friction>
+                            </bullet>
+                        </friction>
+                    </surface>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.8 0.8 1</ambient>
+                        <diffuse>0.8 0.8 0.8 1</diffuse>
+                        <specular>0.8 0.8 0.8 1</specular>
+                    </material>
+                </visual>
+            </link>
+        </model> -->
+
+        <model name="RoboTaksiPist">
+            <static>true</static>
+            <pose>0 0 0.1 0 0 0</pose>
+            <include>
+                <uri>
+                    model://RoboTaksiPist2024
+                </uri>
+            </include>
+        </model>
+
+        <model name="durak_tabelasi_1">
+            <static>true</static>
+            <pose>41.9168 38.4018 0.1 0 0 -1.5707</pose>
+            <include>
+                <uri>
+                    model://DurakTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="durak_tabelasi_2">
+            <static>true</static>
+            <pose>80.7373 86.3220 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://DurakTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="durak_tabelasi_3">
+            <static>true</static>
+            <pose>96.2465 44.7743 0.1 0 0 1.5707</pose>
+            <include>
+                <uri>
+                    model://DurakTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="donel_kavsak_tabelasi">
+            <static>true</static>
+            <pose>45.2090 54.2121 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://DonelKavsakTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_yeri_tabelasi_1">
+            <static>true</static>
+            <pose>-8.095 8.675 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkYeriTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_yeri_tabelasi_2">
+            <static>true</static>
+            <pose>-8.095 11.35 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkYeriTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_yeri_tabelasi_3">
+            <static>true</static>
+            <pose>-8.095 22.4025 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkYeriTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_yeri_tabelasi_4">
+            <static>true</static>
+            <pose>-8.095 25.1205 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkYeriTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_etmek_yasaktir_tabelasi_1">
+            <static>true</static>
+            <pose>-8.095 19.6195 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkEtmekYasaktirTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_etmek_yasaktir_tabelasi_2">
+            <static>true</static>
+            <pose>-8.095 14.025 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkEtmekYasaktirTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_etmek_yasaktir_tabelasi_3">
+            <static>true</static>
+            <pose>-8.095 16.9125 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkEtmekYasaktirTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="park_etmek_yasaktir_tabelasi_4">
+            <static>true</static>
+            <pose>-8.095 27.875 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://ParkEtmekYasaktirTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="girisi_olmayan_yol">
+            <static>true</static>
+            <pose>17.9925 4.5784 0.1 0 0 0</pose>
+            <include>
+                <uri>
+                    model://GirisiOlmayanYolTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="trafik_lambasi_1">
+            <pose>70.3899 -3.1463 0.1 0 0 0</pose>
+            <include>
+                <uri>
+                    model://KirmiziTrafikLambasi
+                </uri>
+            </include>
+        </model>
+        
+        <model name="trafik_lambasi_2">
+            <pose>18.0398 86.2539 0.1 0 0 3.1415</pose>
+            <include>
+                <uri>
+                    model://YesilTrafikLambasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="saga_mecburi_yon">
+            <pose>18.0232 16.4875 0.1 0 0 1.5707</pose>
+            <include>
+                <uri>
+                    model://SagaMecburiYonTabelasi
+                </uri>
+            </include>
+        </model>
+
+        <model name="sola_mecburi_yon">
+            <pose>88.9272 16.4139 0.1 0 0 0</pose>
+            <include>
+                <uri>
+                    model://SolaMecburiYonTabelasi
+                </uri>
+            </include>
+        </model>
+
+    </world>
+</sdf>

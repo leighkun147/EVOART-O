@@ -40,7 +40,7 @@ planner_server:
       max_iterations: 1000000
       max_on_approach_iterations: 1000
       max_planning_time: 5.0              # seconds
-      motion_model_for_search: "DUBIN"    # Ackermann = forward-only Dubin curves
+      motion_model_for_search: "REEDS_SHEPP"  # Allows forward AND reverse (3-point turns)
       cost_travel_multiplier: 2.0
       angle_quantization_bins: 72
       analytic_expansion_ratio: 3.5

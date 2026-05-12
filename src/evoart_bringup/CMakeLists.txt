@@ -3,7 +3,7 @@ project(evoart_bringup)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY launch worlds scripts
+install(DIRECTORY launch worlds scripts models
   DESTINATION share/${PROJECT_NAME}
 )
 

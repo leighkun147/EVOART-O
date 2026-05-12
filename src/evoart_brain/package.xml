@@ -3,7 +3,7 @@
   <name>evoart_brain</name>
   <version>0.0.1</version>
   <description>EVOART-O Intelligence and Navigation Stack</description>
-  <maintainer email="email-adress">leykun</maintainer>
+  <maintainer email="leykun@todo.todo">leykun</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
