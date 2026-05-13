@@ -5,12 +5,12 @@
       "type": "Feature",
       "properties": {
         "name": "Teknofest 2024 Track Route",
-        "description": "Navigate the Teknofest track: Start -> Mandatory Turn -> Bus Stop 1."
+        "description": "Simplified route: Let Nav2 plan the path dynamically using SLAM. Just giving the final destination."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
-          [41.9, 36.4]
+          [39.9, 40.4]
         ]
       }
     }

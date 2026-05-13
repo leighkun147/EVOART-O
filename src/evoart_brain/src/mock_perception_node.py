@@ -25,14 +25,9 @@ from nav_msgs.msg import Odometry
 from evoart_interfaces.msg import YoloDetection, TrafficStatus
 
 
-# ── Ground-truth positions from highway.sdf ──
-# Pedestrian actor patrol centers (midpoint of their crossing paths)
-PEDESTRIAN_POSITIONS = [
-    (28.0, 0.0),    # pedestrian_crosser: crosses road at x=28
-    (57.0, 6.5),    # pedestrian_shoulder: walks along left shoulder
-    (75.0, -2.0),   # pedestrian_erratic: crosses and stops mid-road at x=75
-    (90.0, 0.0),    # pedestrian_runner: fast crossing at x=90
-]
+# ── Ground-truth positions (Emptied for 2024 Track Navigation Testing) ──
+# To test safety reflexes, add coordinates from robotaksi_pist_2024.sdf here.
+PEDESTRIAN_POSITIONS = []
 
 # No traffic lights on the highway (open road)
 TRAFFIC_LIGHT_POSITIONS = []

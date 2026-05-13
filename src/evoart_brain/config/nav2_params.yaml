@@ -33,7 +33,7 @@ planner_server:
 
     GridBased:
       plugin: "nav2_smac_planner::SmacPlannerHybrid"
-      tolerance: 0.5                      # Goal tolerance (m) — relaxed for Ackermann
+      tolerance: 2.0                      # Goal tolerance (m) — relaxed for Ackermann
       downsample_costmap: false
       downsampling_factor: 1
       allow_unknown: true
@@ -76,8 +76,8 @@ controller_server:
     general_goal_checker:
       stateful: true
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.15
+      xy_goal_tolerance: 1.5
+      yaw_goal_tolerance: 3.14
 
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
@@ -87,10 +87,10 @@ controller_server:
       vx_std: 0.2
       vy_std: 0.0
       wz_std: 0.2
-      vx_max: 1.39
+      vx_max: 4.17
       vx_min: 0.0
       vy_max: 0.0
-      wz_max: 0.8
+      wz_max: 2.4
       iteration_count: 1
       prune_distance: 2.0
       transform_tolerance: 0.1
@@ -198,10 +198,10 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: false
     feedback: "OPEN_LOOP"
-    max_velocity: [1.39, 0.0, 0.8]
-    min_velocity: [0.0, 0.0, -0.8]
-    max_accel: [2.5, 0.0, 1.5]
-    max_decel: [-2.5, 0.0, -1.5]
+    max_velocity: [4.17, 0.0, 2.4]
+    min_velocity: [0.0, 0.0, -2.4]
+    max_accel: [7.5, 0.0, 4.5]
+    max_decel: [-7.5, 0.0, -4.5]
     odom_topic: "odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
@@ -234,7 +234,7 @@ local_costmap:
           raytrace_max_range: 6.0
           raytrace_min_range: 0.0
           obstacle_max_range: 5.0
-          obstacle_min_range: 0.0
+          obstacle_min_range: 1.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 5.0
@@ -253,15 +253,14 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       footprint: "[[1.0, 0.525], [1.0, -0.525], [-1.0, -0.525], [-1.0, 0.525]]"
-      resolution: 0.25
-      # Static layer auto-sizes the costmap to the map dimensions
-      rolling_window: false
+      resolution: 0.1
+      # SLAM mode: rolling_window subscribes to /map from slam_toolbox
+      # Large window so the planner can see far ahead
+      rolling_window: true
+      width: 100
+      height: 100
       track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
-      static_layer:
-        plugin: "nav2_costmap_2d::StaticLayer"
-        map_subscribe_transient_local: true
-        enabled: true
+      plugins: ["obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true
@@ -275,7 +274,7 @@ global_costmap:
           raytrace_max_range: 8.0
           raytrace_min_range: 0.0
           obstacle_max_range: 6.0
-          obstacle_min_range: 0.0
+          obstacle_min_range: 1.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 5.0
@@ -333,6 +332,6 @@ amcl:
     set_initial_pose: true
     initial_pose:
       x: 2.0
-      y: 0.0
+      y: -2.0
       z: 0.0
       yaw: 0.0
